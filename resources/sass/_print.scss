@@ -1,0 +1,24 @@
+@media print {
+    @page {
+        size: portrait;
+    }
+
+    .layout-wrapper {
+        display: block !important;
+
+        nav {
+            display: none;
+        }
+
+        .document {
+            border: none;
+            box-shadow: none;
+            max-width: auto;
+            min-height: auto;
+        }
+
+        footer.footer-bar {
+            display: none;
+        }
+    }
+}
