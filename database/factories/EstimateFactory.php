@@ -19,7 +19,7 @@ use Faker\Generator as Faker;
 $factory->define(Estimate::class, function (Faker $faker) {
     return [
         'ref'           =>  uniqid(),
-        'client_id'     =>  mt_rand(1, 50),
+        
         'issue_date'    =>  $faker->date,
         'status'        =>  mt_rand(1, 4),
         'notes'          =>  $faker->realText(50),

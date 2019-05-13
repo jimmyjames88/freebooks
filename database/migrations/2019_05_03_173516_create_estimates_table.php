@@ -21,8 +21,8 @@ class CreateEstimatesTable extends Migration
             $table->integer('status')->default(0);
             $table->text('notes')->nullable();
             $table->text('payment_terms')->nullable();
-            $table->json('line_items');
-            $table->json('expense_items');
+            $table->text('line_items');
+            // $table->json('expense_items');
             $table->timestamps();
         });
     }
