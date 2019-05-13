@@ -33,13 +33,13 @@
                         <input class="input" type="text" :name="'line_items[' + index + '][description]'" v-model="item.description" />
                     </td>
                     <td>
-                        <input class="input quantity" type="number" :name="'line_items[' + index + '][quantity]'" v-model="item.quantity" />
+                        <input class="input quantity" type="number" :name="'line_items[' + index + '][quantity]'" v-model.number="item.quantity" />
                     </td>
                     <td>
-                        <input class="input rate" type="text" :name="'line_items[' + index + '][rate]'" v-model="item.rate" @change="formatCurrency(index)" />
+                        <input class="input rate" type="text" :name="'line_items[' + index + '][rate]'" v-model.number="item.rate" @change="formatCurrency(index)" />
                     </td>
                     <td class="has-text-right">
-                        {{ item.rate * item.quantity | currency }}
+                        {{ parseInt(item.rate) * parseInt(item.quantity) | currency }}
                     </td>
                     <td>
                         <div>
@@ -57,31 +57,6 @@
                 </tr>
             </tbody>
         </table>
-        
-        <!-- slot for expense items -->
-        <slot></slot>
-        <!-- -->
-
-        <div class="columns mt-5">
-            <div class="column is-5 is-offset-7">
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <td>Subtotal:</td>
-                            <td>{{ subtotal | currency }}</td>
-                        </tr>
-                        <tr>
-                            <td>Tax:</td>
-                            <td>{{ tax | currency }}</td>
-                        </tr>
-                        <tr class="has-text-weight-bold">
-                            <td>Total:</td>
-                            <td>{{ total | currency }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -96,27 +71,43 @@
                 lineItems: [],
             }
         },
-        mounted:LineItemMethods.mounted,
+
+        // mounted:LineItemMethods.mounted,
+        mounted() {
+            // create line item from props
+            if(this.items)
+                this.lineItems = this.items
+
+            // initially format input values as currencies
+            this.lineItems.forEach((item, i) => {
+                this.lineItems[i].rate = this.$options.filters.toCurrency(item.rate);
+            });
+
+            // add lineItem if none
+            if(!this.lineItems.length)
+                this.lineItems.push({ description: null, quantity: null, rate: null })
+        },
+
         methods: {
             newLineItem: LineItemMethods.newLineItem,
             removeLineItem: LineItemMethods.removeLineItem,
             formatCurrency: LineItemMethods.formatCurrency
         },
+
         computed: {
             subtotal() {
                 let total = 0;
                 this.lineItems.forEach(function(item){
                     if(item.quantity && item.rate)
-                        total += (item.quantity * item.rate);
+                        total += (Number(item.quantity) * Number(item.rate));
                 });
                 return total;
-            },
-            tax() {
-                return this.subtotal * 0.05;
-            },
-            total() {
-                return this.subtotal + this.tax;
             }
         },
+        watch: {
+            subtotal(amt) {
+                this.$emit('update', amt);
+            }
+        }
     }
 </script>

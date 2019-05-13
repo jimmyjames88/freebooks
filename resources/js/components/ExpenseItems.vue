@@ -23,7 +23,7 @@
                         {{ item.tax | currency }}
                     </td>
                     <td class="has-text-right">
-                        {{ item.price + item.tax | currency }}
+                        {{ Number(item.price) + item.tax | currency }}
                     </td>
                     <td></td>
                 </tr>
@@ -34,13 +34,13 @@
                         <input class="input" type="text" :name="'line_items[' + index + '][description]'" v-model="item.description" />
                     </td>
                     <td>
-                        <input class="input quantity" type="number" :name="'line_items[' + index + '][price]'" v-model="item.price" />
+                        <input class="input rate" type="text" :name="'line_items[' + index + '][price]'" v-model.number="item.price" @change="formatCurrency(index)" />
                     </td>
                     <td>
-                        <input class="input rate" type="text" :name="'line_items[' + index + '][tax]'" v-model="item.tax" />
+                        <input class="input rate" type="text" :name="'line_items[' + index + '][tax]'" v-model.number="item.tax" @change="formatCurrency(index)" />
                     </td>
                     <td class="has-text-right">
-                        {{ item.price + item.tax | currency }}
+                        {{ parseInt(item.price) + parseInt(item.tax) | currency }}
                     </td>
                     <td>
                         <div>
@@ -72,27 +72,44 @@
                 lineItems: [],
             }
         },
-        mounted:LineItemMethods.mounted,
+        // mounted:LineItemMethods.mounted,
+        mounted() {
+            // create line item from props
+            if(this.items)
+                this.lineItems = this.items
+
+            // initially format input values as currencies
+            this.lineItems.forEach((item, i) => {
+                this.lineItems[i].rate = this.$options.filters.toCurrency(item.rate);
+            });
+
+            // add lineItem if none
+            if(!this.lineItems.length)
+                this.lineItems.push({ description: null, price: null, tax: null })
+        },
         methods: {
             newLineItem: LineItemMethods.newLineItem,
             removeLineItem: LineItemMethods.removeLineItem,
-            formatCurrency: LineItemMethods.formatCurrency
+            // formatCurrency: LineItemMethods.formatCurrency
+            formatCurrency(index) {
+                this.lineItems[index].price = this.$options.filters.toCurrency(parseInt(this.lineItems[index].price));
+                this.lineItems[index].tax = this.$options.filters.toCurrency(parseInt(this.lineItems[index].tax));
+            },
         },
         computed: {
             subtotal() {
                 let total = 0;
                 this.lineItems.forEach(function(item){
-                    if(item.quantity && item.rate)
-                        total += (item.quantity * item.rate);
+                    if(item.price && item.tax)
+                        total += (parseInt(item.price) + parseInt(item.tax));
                 });
                 return total;
-            },
-            tax() {
-                return this.subtotal * 0.05;
-            },
-            total() {
-                return this.subtotal + this.tax;
             }
         },
+        watch: {
+            subtotal(amt) {
+                this.$emit('update', amt);
+            }
+        }
     }
 </script>

@@ -25,3 +25,11 @@ Route::get('estimates/{estimate}/edit', 'EstimateController@edit');
 Route::get('estimates/{estimate}', 'EstimateController@show');
 Route::post('estimates', 'EstimateController@store');
 Route::put('estimates/{estimate}', 'EstimateController@update');
+
+Auth::routes();
+Route::get('logout', function() {
+    Auth::logout();
+    return redirect('login');
+});
+
+Route::get('/home', 'HomeController@index')->name('home');
